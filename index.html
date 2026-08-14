@@ -1,29 +1,32 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Meine Bilder</title>
+  <title>Handbuch</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      background-color: #111;
-      height: 100vh;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
 
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-
-      font-family: Arial, sans-serif;
     }
 
     .gallery {
       position: relative;
-
-      width: 90%;
+      width: 95%;
+      max-width: 1200px;
       height: 90vh;
 
       display: flex;
@@ -31,13 +34,14 @@
       align-items: center;
     }
 
-    #bild {
+    #image {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
+      user-select: none;
     }
 
-    button {
+    .arrow {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
@@ -48,134 +52,159 @@
       border: none;
       border-radius: 50%;
 
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.55);
       color: white;
 
-      font-size: 35px;
+      font-size: 36px;
       cursor: pointer;
+
+      transition: background 0.2s;
+      z-index: 10;
     }
 
-    #links {
+    .arrow:hover {
+      background: rgba(0, 0, 0, 0.9);
+    }
+
+    .left {
       left: 20px;
     }
 
-    #rechts {
+    .right {
       right: 20px;
     }
 
-    button:hover {
-      background: black;
+    .counter {
+      position: absolute;
+      bottom: 15px;
+
+      background: rgba(0, 0, 0, 0.65);
+      padding: 8px 14px;
+      border-radius: 20px;
+
+      font-size: 14px;
+      z-index: 10;
     }
 
-    #zaehler {
-      position: absolute;
-      bottom: 20px;
+    @media (max-width: 700px) {
+      .gallery {
+        width: 100%;
+        height: 100vh;
+      }
 
-      color: white;
-      background: rgba(0,0,0,0.6);
+      .arrow {
+        width: 48px;
+        height: 48px;
+        font-size: 28px;
+      }
 
-      padding: 8px 15px;
-      border-radius: 20px;
+      .left {
+        left: 10px;
+      }
+
+      .right {
+        right: 10px;
+      }
     }
   </style>
-
 </head>
 
 <body>
 
   <div class="gallery">
 
-    <button id="links">‹</button>
+    <button
+      class="arrow left"
+      onclick="previousImage()"
+      aria-label="Vorheriges Bild"
+    >
+      &#10094;
+    </button>
 
-    <img id="bild" src="bilder/bild1.jpg">
+    <img id="image" alt="Handbuch-Seite">
 
-    <button id="rechts">›</button>
+    <button
+      class="arrow right"
+      onclick="nextImage()"
+      aria-label="Nächstes Bild"
+    >
+      &#10095;
+    </button>
 
-    <div id="zaehler">1 / 10</div>
+    <div class="counter" id="counter"></div>
 
   </div>
 
-
   <script>
+    const images = [
+      "bilder/Handbuch.jpg",
+      "bilder/Handbuch(1).jpg",
+      "bilder/Handbuch(2).jpg",
+      "bilder/Handbuch(3).jpg",
+      "bilder/Handbuch(4).jpg",
+      "bilder/Handbuch(5).jpg",
+      "bilder/Handbuch(6).jpg",
+      "bilder/Handbuch(7).jpg",
+      "bilder/Handbuch(8).jpg",
+      "bilder/Handbuch(9).jpg",
+      "bilder/Handbuch(10).jpg",
+      "bilder/Handbuch(11).jpg",
+      "bilder/Handbuch(12).jpg",
+      "bilder/Handbuch(13).jpg",
+      "bilder/Handbuch(14).jpg",
+      "bilder/Handbuch(15).jpg",
+      "bilder/Handbuch(16).jpg",
+      "bilder/Handbuch(17).jpg",
+      "bilder/Handbuch(18).jpg",
+      "bilder/Handbuch(19).jpg",
+      "bilder/Handbuch(20).jpg",
+      "bilder/Handbuch(21).jpg"
+    ];
 
-const images = [
-  "bilder/Handbuch.jpg",
-  "bilder/Handbuch(1).jpg",
-  "bilder/Handbuch(2).jpg",
-  "bilder/Handbuch(3).jpg",
-  "bilder/Handbuch(4).jpg",
-  "bilder/Handbuch(5).jpg",
-  "bilder/Handbuch(6).jpg",
-  "bilder/Handbuch(7).jpg",
-  "bilder/Handbuch(8).jpg",
-  "bilder/Handbuch(9).jpg",
-  "bilder/Handbuch(10).jpg",
-  "bilder/Handbuch(11).jpg",
-  "bilder/Handbuch(12).jpg",
-  "bilder/Handbuch(13).jpg",
-  "bilder/Handbuch(14).jpg",
-  "bilder/Handbuch(15).jpg",
-  "bilder/Handbuch(16).jpg",
-  "bilder/Handbuch(17).jpg",
-  "bilder/Handbuch(18).jpg",
-  "bilder/Handbuch(19).jpg",
-  "bilder/Handbuch(20).jpg",
-  "bilder/Handbuch(21).jpg"
-];
+    let currentImage = 0;
 
-    let aktuell = 0;
+    const imageElement = document.getElementById("image");
+    const counterElement = document.getElementById("counter");
 
-    const bild = document.getElementById("bild");
-    const zaehler = document.getElementById("zaehler");
+    function showImage() {
+      imageElement.src = images[currentImage];
 
-
-    function anzeigen() {
-
-      bild.src = bilder[aktuell];
-
-      zaehler.textContent =
-        (aktuell + 1) + " / " + bilder.length;
+      counterElement.textContent =
+        (currentImage + 1) + " / " + images.length;
     }
 
+    function nextImage() {
+      currentImage++;
 
-    document.getElementById("rechts").onclick = function() {
-
-      aktuell++;
-
-      if (aktuell >= bilder.length) {
-        aktuell = 0;
+      if (currentImage >= images.length) {
+        currentImage = 0;
       }
 
-      anzeigen();
-    };
+      showImage();
+    }
 
+    function previousImage() {
+      currentImage--;
 
-    document.getElementById("links").onclick = function() {
-
-      aktuell--;
-
-      if (aktuell < 0) {
-        aktuell = bilder.length - 1;
+      if (currentImage < 0) {
+        currentImage = images.length - 1;
       }
 
-      anzeigen();
-    };
-
+      showImage();
+    }
 
     document.addEventListener("keydown", function(event) {
-
       if (event.key === "ArrowRight") {
-        document.getElementById("rechts").click();
+        nextImage();
       }
 
       if (event.key === "ArrowLeft") {
-        document.getElementById("links").click();
+        previousImage();
       }
-
     });
 
+    showImage();
   </script>
 
 </body>
-
 </html>
